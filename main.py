@@ -1,14 +1,16 @@
-from kregeClass import ConUI
+from kregeClass import ConUI, GUI
 from algKlass import Alg
 
 from data import db_session
 from data.words import Word
 
 import json
+import pygame
 
 
 def main():
-    app = ConUI(Alg(), load_config())
+    config = load_config()
+    app = ConUI(Alg(), config) if config["debug"] else GUI(Alg(), config)
     app.run()
 
 
@@ -16,7 +18,8 @@ def load_config():
     config = {
         "debug": True,
         "resx": 600,
-        "resy": 300
+        "resy": 300,
+        "fps": 15,
     }
     try:
         with open("config.json", "r") as configFile:
@@ -30,4 +33,6 @@ def load_config():
 
 if __name__ == '__main__':
     db_session.global_init("db/data.sqlite")
+    pygame.init()
+
     main()
