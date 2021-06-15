@@ -78,7 +78,7 @@ class GUI(UI):
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    self.running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     for button in self.buttons:
                         if button.charged == 1:
@@ -91,7 +91,16 @@ class GUI(UI):
                                 button.charged = 1
                             else:
                                 button.charged = 0
-
+                    for tinput in self.tinputs:
+                        if tinput.under_cursor(pygame.mouse.get_pos()):
+                            tinput.active = 0 if tinput.active == 1 else 1
+                elif event.type == pygame.KEYDOWN:
+                    for tinput in self.tinputs:
+                        if tinput.active == 1:
+                            if event.key != 8:
+                                tinput.text += event.unicode
+                            elif len(tinput.text) >= 1:
+                                tinput.text = tinput.text[:-1]
                 else:
                     for button in self.buttons:
                         if button.under_cursor(pygame.mouse.get_pos()):
@@ -114,8 +123,29 @@ class GUI(UI):
     def init_new_word(self):
         self.reset_ui()
         self.tinputs.append(
-            # put here Tinput to test it
+            Tinput((10, 80), 680, self.screen)
         )
+        self.buttons.append(
+            Button("Введите слово:", (270, 40), self.screen)
+        )
+        self.buttons.append(
+            Button("Готово ", (310, 120), self.screen, clicked=self.init_set_article)
+        )
+
+    def init_set_article(self):
+        word = self.tinputs[0].text
+        self.reset_ui()
+        for i in range(len(word)):
+            self.buttons.append(
+                Button(word[i], (10 + 30 * i, 120), self.screen, clicked=self.add_word)
+            )
+        self.buttons.append(
+            Button("Выберите ударную гласную: ", (210, 40), self.screen)
+        )
+
+    def add_word(self):
+        pass
+
 
     def reset_ui(self):
         self.buttons, self.tinputs = [], []
