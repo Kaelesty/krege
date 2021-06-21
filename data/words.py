@@ -11,3 +11,4 @@ class Word(SqlAlchemyBase):
     string = sqlalchemy.Column(sqlalchemy.String)
     accent = sqlalchemy.Column(sqlalchemy.Integer)
     score = sqlalchemy.Column(sqlalchemy.Integer)
+    register_time = sqlalchemy.Column(sqlalchemy.DATETIME)

@@ -1,7 +1,7 @@
 import pygame
 
 class Button:
-    def __init__(self, text, position, screen, font_size=20, clicked=False):
+    def __init__(self, text, position, screen, font_size=20, clicked=False, attribute=None):
         self.text = text
 
         self.size = ((len(text) + 1) * 12, font_size + 15)
@@ -13,6 +13,7 @@ class Button:
         self.screen = screen
         self.width = 2
         self.charged = False
+        self.attribute = attribute
 
     def draw(self):
         font = pygame.font.Font("20806.ttf", self.font_size)

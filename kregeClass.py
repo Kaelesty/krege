@@ -1,5 +1,7 @@
 import pygame
 
+import datetime as dt
+
 PREFIX = ">>> "
 
 
@@ -7,6 +9,7 @@ from data import db_session
 from data.words import Word
 from buttonClass import Button
 from tinputClass import Tinput
+from algKlass import Alg
 
 
 class UI:
@@ -52,7 +55,8 @@ class ConUI(UI):
         self.alg.new_word(Word(
             string=input(f"{PREFIX}слово:\n{PREFIX}"),
             accent=input(f"{PREFIX}ударение:\n{PREFIX}"),
-            score=input(f"{PREFIX}рейтинг:\n{PREFIX}")
+            score=input(f"{PREFIX}рейтинг:\n{PREFIX}"),
+            register_time=dt.datetime.now()
         ))
         self.output("слово успешно сохранено")
 
@@ -87,7 +91,10 @@ class GUI(UI):
                     for button in self.buttons:
                         if button.charged == 2:
                             if button.under_cursor(pygame.mouse.get_pos()):
-                                button.clicked()
+                                if button.attribute is None:
+                                    button.clicked()
+                                else:
+                                    button.clicked(button.attribute)
                                 button.charged = 1
                             else:
                                 button.charged = 0
@@ -114,11 +121,21 @@ class GUI(UI):
             pygame.display.flip()
         pygame.quit()
 
-    def init_main_menu(self):
+    def init_main_menu(self, message=None):
         self.reset_ui()
         self.buttons.append(
-            Button("Новое слово", (270, 200), self.screen, clicked=self.init_new_word)
+            Button("Новое слово", (270, 150), self.screen, clicked=self.init_new_word)
         )
+        self.buttons.append(
+            Button("Блиц       ", (270, 200), self.screen, clicked=self.init_blitz_selector)
+        )
+        if message is not None:
+            button = Button(message, (265, 245), self.screen, font_size=10, clicked=self.init_main_menu)
+            # кнопка записывается в переменную для изменения размера вручную
+            button.size = (154, 25)
+            self.buttons.append(
+                button
+            )
 
     def init_new_word(self):
         self.reset_ui()
@@ -137,14 +154,54 @@ class GUI(UI):
         self.reset_ui()
         for i in range(len(word)):
             self.buttons.append(
-                Button(word[i], (10 + 30 * i, 120), self.screen, clicked=self.add_word)
+                Button(word[i], (10 + 30 * i, 120), self.screen, clicked=self.add_word, attribute=i)
+            )
+        self.buttons.append(
+            Button("Выберите ударную гласную: ", (210, 40), self.screen)
+        )
+        self.word = word
+
+    def init_blitz_selector(self):
+        self.reset_ui()
+        self.buttons.append(
+            Button("Слова за сегодня  ", (270, 150), self.screen, clicked=self.init_blitz, attribute=0)
+        )
+        self.buttons.append(
+            Button("Слова за неделю   ", (270, 200), self.screen, clicked=self.init_blitz, attribute=1)
+        )
+        self.buttons.append(
+            Button("Слова за все время", (270, 250), self.screen, clicked=self.init_blitz, attribute=2)
+        )
+
+    def add_word(self, article_position):
+        self.alg.new_word(self.word, article_position)
+        self.init_main_menu(message="Слово успешно добавлено!")
+
+    def init_blitz(self, type):
+        self.alg.init_words(type)
+        self.blitz()
+
+    def blitz(self):
+        self.reset_ui()
+        word = self.alg.get_word()
+
+        for i in range(len(word.string)):
+            self.buttons.append(
+                Button(word.string[i], (10 + 30 * i, 120), self.screen, clicked=self.check_blitz, attribute=i)
             )
         self.buttons.append(
             Button("Выберите ударную гласную: ", (210, 40), self.screen)
         )
 
-    def add_word(self):
-        pass
+    def check_blitz(self, article):
+        self.reset_ui()
+        text = "Правильно!  " if self.alg.check_word(article) else "Неправильно!"
+        self.buttons.append(
+            Button(text, (270, 200), self.screen, clicked=self.blitz)
+        )
+        self.buttons.append(
+            Button("Завершить   ", (270, 250), self.screen, clicked=self.init_main_menu)
+        )
 
 
     def reset_ui(self):
