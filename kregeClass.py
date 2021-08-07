@@ -127,7 +127,7 @@ class GUI(UI):
             Button("Новое слово", (270, 150), self.screen, clicked=self.init_new_word)
         )
         self.buttons.append(
-            Button("Блиц       ", (270, 200), self.screen, clicked=self.init_blitz_selector)
+            Button("Блиц       ", (270, 200), self.screen, clicked=self.init_blitz)
         )
         if message is not None:
             button = Button(message, (265, 245), self.screen, font_size=10, clicked=self.init_main_menu)
@@ -162,6 +162,7 @@ class GUI(UI):
         self.word = word
 
     def init_blitz_selector(self):
+        # legacy
         self.reset_ui()
         self.buttons.append(
             Button("Слова за сегодня  ", (270, 150), self.screen, clicked=self.init_blitz, attribute=0)
@@ -177,8 +178,8 @@ class GUI(UI):
         self.alg.new_word(self.word, article_position)
         self.init_main_menu(message="Слово успешно добавлено!")
 
-    def init_blitz(self, type):
-        self.alg.init_words(type)
+    def init_blitz(self):
+        self.alg.init_words()
         self.blitz()
 
     def blitz(self):

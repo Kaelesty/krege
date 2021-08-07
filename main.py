@@ -10,7 +10,7 @@ import pygame
 
 def main():
     config = load_config()
-    app = ConUI(Alg(), config) if config["debug"] else GUI(Alg(), config)
+    app = ConUI(Alg(config), config) if config["debug"] else GUI(Alg(config), config)
     app.run()
 
 
@@ -34,5 +34,8 @@ def load_config():
 if __name__ == '__main__':
     db_session.global_init("db/data.sqlite")
     pygame.init()
-
-    main()
+    try:
+        main()
+    except Exception as ex:
+        print(ex)
+        input()

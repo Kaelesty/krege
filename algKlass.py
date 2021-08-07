@@ -6,8 +6,8 @@ import random
 
 
 class Alg:
-    def __init__(self):
-        pass
+    def __init__(self, config):
+        self.config = config
 
     def new_word(self, string, article):
         word = Word()
@@ -19,20 +19,14 @@ class Alg:
         db_sess.add(word)
         db_sess.commit()
 
-    def init_words(self, type):
+    def init_words(self):
         db_sess = db_session.create_session()
         """
         0 - за сегодня
         1 - за неделю
         2 - за все время
         """
-        if type == 0:
-            deltaTime = dt.timedelta(days=1)
-        elif type == 1:
-            deltaTime = dt.timedelta(days=7)
-        else:
-            deltaTime = dt.timedelta(days=29000)
-        words = db_sess.query(Word).filter(dt.datetime.now() - Word.register_time < deltaTime).all()
+        words = db_sess.query(Word).filter().all()
         self.map = []
         for word in words:
             self.map += [word] * int(word.score)
@@ -45,8 +39,10 @@ class Alg:
         db_sess = db_session.create_session()
         word = db_sess.query(Word).filter(Word.string == self.last_sended.string).first()
         if word.accent == article:
-            word.score -= 0.2 if word.score >= 1 else 0
+            word.score -= self.config["alg-ans-step"] if word.score >= 1 else 0
+            db_sess.commit()
             return True
         else:
-            word.score += 0.2
+            word.score += self.config["alg-ans-step"]
+            db_sess.commit()
             return False
